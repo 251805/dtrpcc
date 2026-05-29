@@ -28,8 +28,8 @@ export default function App() {
   const initApp = async () => {
     // 1. Verify connection
     await testConnection();
-    // 2. Seed initial employees if empty inside Firestore
-    await seedEmployeesIfEmpty();
+    // 2. Force seed/sync initial employees inside Firestore
+    await seedEmployeesIfEmpty(true);
     // 3. Load active data lists
     await handleRefreshAll();
   };

@@ -96,10 +96,10 @@ To protect against proxy check-ins using photographs, QR codes are validated ser
 
 ### C. Late Tardiness and Undertime Discrepancy Calculations
 Work shifts are categorized into four rigid, pre-defined operational categories:
-1. **Morning Shift**: 06:00 AM - 02:00 PM (Start: 360 min, End: 840 min)
-2. **Regular Shift**: 08:00 AM - 05:00 PM (Start: 480 min, End: 1020 min)
-3. **Afternoon Shift**: 02:00 PM - 10:00 PM (Start: 840 min, End: 1320 min)
-4. **Night Shift**: 10:00 PM - 06:00 AM (Start: 1320 min, End: 360 min, Overnight: True)
+1. **Morning 6am-2pm**: 06:00 AM - 02:00 PM (Start: 360 min, End: 840 min)
+2. **Regular 8am-5pm**: 08:00 AM - 05:00 PM (Start: 480 min, End: 1020 min)
+3. **Afternoon 2pm-10pm**: 02:00 PM - 10:00 PM (Start: 840 min, End: 1320 min)
+4. **Night 10pm-6am**: 10:00 PM - 06:00 AM (Start: 1320 min, End: 360 min, Overnight: True)
 
 - **Inputs**: Time In string (`HH:MM`), Time Out string (`HH:MM`).
 - **Validation and Calculation**:

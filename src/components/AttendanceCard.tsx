@@ -146,6 +146,7 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
           login_at: firestoreTimestamp,
           logout_at: null,
           date: todayStr,
+          remarks: isFromScan ? '' : (manualRemarks || '')
         }).catch((err) => handleFirestoreError(err, OperationType.WRITE, pathSession));
 
         showStatus(`Clocked IN (Login) successfully for ${employeeName}! Have a safe shift.`, 'success');
@@ -163,7 +164,8 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
         if (!activeSessionsSnapshot.empty) {
           const activeSessionDoc = activeSessionsSnapshot.docs[0];
           await updateDoc(doc(db, 'attendance_sessions', activeSessionDoc.id), {
-            logout_at: firestoreTimestamp
+            logout_at: firestoreTimestamp,
+            remarks: isFromScan ? (activeSessionDoc.data().remarks || '') : (manualRemarks || activeSessionDoc.data().remarks || '')
           }).catch((err) => handleFirestoreError(err, OperationType.UPDATE, `${pathSession}/${activeSessionDoc.id}`));
           showStatus(`Clocked OUT (Logout) successfully for ${employeeName}! Thank you for your service.`, 'success');
         } else {
@@ -173,9 +175,16 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
             login_at: firestoreTimestamp,
             logout_at: firestoreTimestamp,
             date: todayStr,
+            remarks: isFromScan ? '' : (manualRemarks || '')
           }).catch((err) => handleFirestoreError(err, OperationType.WRITE, pathSession));
           showStatus(`Clocked OUT (Logout fallback created) for ${employeeName}!`, 'success');
         }
+      }
+
+      // Clear manual fields
+      if (!isFromScan) {
+        setManualEid('');
+        setManualRemarks('');
       }
 
       // Update duplicate lock timestamp

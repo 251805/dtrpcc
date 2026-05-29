@@ -92,14 +92,14 @@ export async function testConnection(): Promise<boolean> {
 }
 
 // Seed employees into Firestore if the collection is empty
-export async function seedEmployeesIfEmpty() {
+export async function seedEmployeesIfEmpty(force = false) {
   const pathVal = 'employees';
   try {
     const qSnapshot = await getDocs(collection(db, pathVal));
-    if (qSnapshot.empty) {
-      console.log("Firestore 'employees' collection is empty. Seeding standard employees list...");
+    if (qSnapshot.empty || force) {
+      console.log(`Firestore 'employees' collection is ${qSnapshot.empty ? 'empty' : 'not empty (forcing sync)'}. Seeding standard employees list...`);
       for (const emp of SEED_EMPLOYEES) {
-        await setDoc(doc(db, 'employees', emp.eid), emp);
+        await setDoc(doc(db, 'employees', emp.eid), emp, { merge: true });
       }
       console.log("Employee seeding to Firestore completed.");
     }

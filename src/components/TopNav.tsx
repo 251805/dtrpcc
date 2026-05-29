@@ -13,8 +13,16 @@ export default function TopNav({ onOpenAdmin, onOpenReport }: TopNavProps) {
   return (
     <header id="app-header" className="w-full bg-neutral-900 text-white border-b border-neutral-800 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-md font-sans">
       <div className="flex items-center gap-3">
-        <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg">
-          <Shield size={24} />
+        <div className="p-1 bg-white rounded-lg flex items-center justify-center shadow-xs">
+          <img 
+            src="https://raw.githubusercontent.com/251805/etcfile/main/PCCLogo.png" 
+            alt="PCC Logo" 
+            className="w-10 h-10 object-contain"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "https://github.com/251805/etcfile/blob/main/PCCLogo.png?raw=true";
+            }}
+          />
         </div>
         <div>
           <h1 className="text-lg font-extrabold tracking-tight">PCC DTR Tracking System</h1>

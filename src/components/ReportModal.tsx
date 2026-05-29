@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getEmployees, getAttendanceSessions } from '../lib/firebase';
+import { db, getEmployees, getAttendanceSessions } from '../lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { Employee } from '../types';
 import { findClosestShift, calculateTardiness, calculateUndertime, formatMinutes } from '../lib/shiftLogic';
 import { FileSpreadsheet, Printer, Search, Calendar, Landmark, Info, CheckCircle, FileText, RefreshCw } from 'lucide-react';
@@ -97,12 +98,13 @@ export default function ReportModal({ onClose }: ReportModalProps) {
     return {
       ...sess,
       employeeName: emp ? emp.name : 'Unknown Employee',
+      employeeRole: emp && emp.role ? emp.role : 'CCTV OPERATOR',
       shiftName: matchingShift.name,
       loginTimeFormatted: loginDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       logoutTimeFormatted: sess.logout_at ? new Date(sess.logout_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Active',
       tardinessMins,
       undertimeMins,
-      durationHours: sess.logout_at ? (shiftMinutesWorked / 60).toFixed(1) : '---',
+      durationHours: sess.logout_at ? (shiftMinutesWorked / 60).toFixed(1) : '0.0',
       dailyRate,
       penaltyTardiness,
       penaltyUndertime,
@@ -134,8 +136,72 @@ export default function ReportModal({ onClose }: ReportModalProps) {
   const totalPhilhealthDeductions = filteredRecords.reduce((acc, curr) => acc + curr.philhealthDeduction, 0);
   const totalPayoutSums = filteredRecords.reduce((acc, curr) => acc + curr.netPayout, 0);
 
+  const totalWorkedHours = filteredRecords.reduce((acc, curr) => {
+    const val = parseFloat(curr.durationHours);
+    return acc + (isNaN(val) ? 0 : val);
+  }, 0);
+
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleUpdateRemarks = async (sessionId: string, remarksVal: string) => {
+    try {
+      const docRef = doc(db, 'attendance_sessions', sessionId);
+      await updateDoc(docRef, { remarks: remarksVal });
+      // Update local state instantly so user doesn't feel lag
+      setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, remarks: remarksVal } : s));
+    } catch (err) {
+      console.error("Failed to commit manual remarks update:", err);
+    }
+  };
+
+  const handleDownloadCSV = () => {
+    const headers = [
+      "AC No",
+      "Name",
+      "Position",
+      "Department",
+      "Date",
+      "Shift Category",
+      "Start Time",
+      "End Time",
+      "Tardiness",
+      "Undertime",
+      "Total hours",
+      "Philhealth",
+      "Net Due (₱)",
+      "Remarks"
+    ];
+
+    const rows = filteredRecords.map(rec => [
+      `"${rec.employee_id}"`,
+      `"${rec.employeeName.replace(/"/g, '""')}"`,
+      `"${(rec.employeeRole || 'CCTV OPERATOR').replace(/"/g, '""')}"`,
+      `"Office of the Municipal Mayor"`,
+      `"${rec.date}"`,
+      `"${rec.shiftName}"`,
+      `"${rec.loginTimeFormatted}"`,
+      `"${rec.logoutTimeFormatted}"`,
+      `"${rec.tardinessMins > 0 ? rec.tardinessMins : 0}"`,
+      `"${rec.undertimeMins > 0 ? rec.undertimeMins : 0}"`,
+      `"${rec.durationHours}"`,
+      `"${rec.philhealthDeduction}"`,
+      `"${rec.netPayout.toFixed(2)}"`,
+      `"${(rec.remarks || '').replace(/"/g, '""')}"`
+    ]);
+
+    const csvData = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const blob = new Blob(["\uFEFF" + csvData], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const filename = `PCC_DTR_Report_${selectedYear}_${selectedMonth === 'all' ? 'AllMonths' : selectedMonth}.csv`;
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -204,6 +270,13 @@ export default function ReportModal({ onClose }: ReportModalProps) {
               </select>
             </div>
             <button 
+              onClick={handleDownloadCSV}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg flex items-center gap-2 h-[38px] transition shadow-xs"
+            >
+              <FileSpreadsheet size={16} />
+              Download CSV
+            </button>
+            <button 
               onClick={handlePrint}
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg flex items-center gap-2 h-[38px] transition shadow-xs"
             >
@@ -214,8 +287,17 @@ export default function ReportModal({ onClose }: ReportModalProps) {
         </div>
 
         {/* Print Title - Visible only when printing */}
-        <div className="hidden print:block p-8 text-center border-b border-gray-200 text-neutral-950 font-sans">
-          <h1 className="text-2xl font-bold tracking-tight uppercase">PAGBILAO COMMAND CENTER (PCC)</h1>
+        <div className="hidden print:flex flex-col items-center p-8 text-center border-b border-gray-200 text-neutral-950 font-sans">
+          <img 
+            src="https://raw.githubusercontent.com/251805/etcfile/main/PCCLogo.png" 
+            alt="PCC Logo" 
+            className="w-16 h-16 object-contain mb-3"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "https://github.com/251805/etcfile/blob/main/PCCLogo.png?raw=true";
+            }}
+          />
+          <h1 className="text-2xl font-bold tracking-tight mb-1 uppercase">PAGBILAO COMMAND CENTER (PCC)</h1>
           <h2 className="text-lg font-semibold text-gray-700">Official Monthly Daily Time Record (DTR) Ledger</h2>
           <p className="text-xs text-gray-500 mt-1">Compiled on: {new Date().toLocaleString()} (GMT+8 Manila Standard Time)</p>
           <div className="flex justify-center gap-8 mt-4 text-xs font-semibold">
@@ -254,59 +336,80 @@ export default function ReportModal({ onClose }: ReportModalProps) {
           ) : (
             <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs print:border-none print:shadow-none font-sans">
               <table className="w-full border-collapse text-left text-xs text-neutral-800">
-                <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold tracking-wider border-b border-gray-200 print:bg-slate-100">
+                <thead className="bg-slate-50 text-slate-500 uppercase text-[9px] font-bold tracking-wider border-b border-gray-200 print:bg-slate-100">
                   <tr>
-                    <th className="px-4 py-3">EID</th>
-                    <th className="px-4 py-3">Roster Name</th>
-                    <th className="px-4 py-3">Date</th>
-                    <th className="px-4 py-3">Shift Category</th>
-                    <th className="px-4 py-3">Clock IN</th>
-                    <th className="px-4 py-3">Clock OUT</th>
-                    <th className="px-4 py-3 text-right">Lates (m)</th>
-                    <th className="px-4 py-3 text-right">Undertimes (m)</th>
-                    <th className="px-4 py-3 text-right">PhilHealth (₱)</th>
-                    <th className="px-4 py-3 text-right font-bold text-neutral-900">Net Due (₱)</th>
+                    <th className="px-3 py-3">AC No</th>
+                    <th className="px-3 py-3">Name</th>
+                    <th className="px-3 py-3">Position</th>
+                    <th className="px-3 py-3">Department</th>
+                    <th className="px-3 py-3">Date</th>
+                    <th className="px-3 py-3">Shift Category</th>
+                    <th className="px-3 py-3">Start Time</th>
+                    <th className="px-3 py-3">End Time</th>
+                    <th className="px-3 py-3 text-right">Tardiness</th>
+                    <th className="px-3 py-3 text-right">Undertime</th>
+                    <th className="px-3 py-3 text-right">Total hours</th>
+                    <th className="px-3 py-3 text-right">Philhealth</th>
+                    <th className="px-3 py-3 text-right font-bold text-neutral-900">Net Due (₱)</th>
+                    <th className="px-3 py-3 text-left w-36">Remarks</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 font-mono">
+                <tbody className="divide-y divide-gray-200 font-mono text-[11px]">
                   {filteredRecords.map((rec, i) => (
                     <tr key={rec.id || i} className="hover:bg-slate-50/50 transition print:hover:bg-transparent">
-                      <td className="px-4 py-2.5 font-bold text-gray-500">{rec.employee_id}</td>
-                      <td className="px-4 py-2.5 font-sans font-bold text-neutral-950">{rec.employeeName}</td>
-                      <td className="px-4 py-2.5 text-gray-500">{rec.date}</td>
-                      <td className="px-4 py-2.5 font-sans font-medium text-gray-600">{rec.shiftName}</td>
-                      <td className="px-4 py-2.5 text-emerald-600 font-semibold">{rec.loginTimeFormatted}</td>
-                      <td className="px-4 py-2.5 text-rose-600 font-semibold">{rec.logoutTimeFormatted}</td>
-                      <td className={`px-4 py-2.5 text-right ${rec.tardinessMins > 0 ? 'text-rose-600 font-bold' : 'text-gray-400'}`}>
+                      <td className="px-3 py-2.5 font-bold text-gray-500">{rec.employee_id}</td>
+                      <td className="px-3 py-2.5 font-sans font-bold text-neutral-950">{rec.employeeName}</td>
+                      <td className="px-3 py-2.5 font-sans text-gray-600">{rec.employeeRole}</td>
+                      <td className="px-3 py-2.5 font-sans text-gray-500 text-[10px]">Office of the Municipal Mayor</td>
+                      <td className="px-3 py-2.5 text-gray-500">{rec.date}</td>
+                      <td className="px-3 py-2.5 font-sans font-medium text-gray-600">{rec.shiftName}</td>
+                      <td className="px-3 py-2.5 text-emerald-600 font-semibold">{rec.loginTimeFormatted}</td>
+                      <td className="px-3 py-2.5 text-rose-600 font-semibold">{rec.logoutTimeFormatted}</td>
+                      <td className={`px-3 py-2.5 text-right ${rec.tardinessMins > 0 ? 'text-rose-600 font-bold' : 'text-gray-400'}`}>
                         {rec.tardinessMins > 0 ? `${rec.tardinessMins}m` : '0'}
                       </td>
-                      <td className={`px-4 py-2.5 text-right ${rec.undertimeMins > 0 ? 'text-amber-600 font-bold' : 'text-gray-400'}`}>
+                      <td className={`px-3 py-2.5 text-right ${rec.undertimeMins > 0 ? 'text-amber-600 font-bold' : 'text-gray-400'}`}>
                         {rec.undertimeMins > 0 ? `${rec.undertimeMins}m` : '0'}
                       </td>
-                      <td className="px-4 py-2.5 text-right text-indigo-600">
+                      <td className="px-3 py-2.5 text-right text-neutral-600 font-semibold">
+                        {rec.durationHours} hrs
+                      </td>
+                      <td className="px-3 py-2.5 text-right text-indigo-600">
                         {rec.philhealthDeduction > 0 ? `₱${rec.philhealthDeduction.toFixed(2)}` : '₱0.00'}
                       </td>
-                      <td className="px-4 py-2.5 text-right font-bold text-neutral-950">
+                      <td className="px-3 py-2.5 text-right font-bold text-neutral-950">
                         ₱{rec.netPayout.toLocaleString([], { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                      <td className="px-3 py-2.5 font-sans">
+                        <span className="hidden print:inline text-xs text-gray-700">{rec.remarks || ''}</span>
+                        <input 
+                          type="text" 
+                          value={rec.remarks || ''} 
+                          onChange={(e) => handleUpdateRemarks(rec.id, e.target.value)}
+                          placeholder="Click to add remarks..."
+                          className="w-full px-2 py-0.5 bg-slate-50 border border-gray-100 rounded text-[10px] focus:outline-indigo-500 focus:bg-white focus:border-indigo-400 print:hidden font-sans"
+                        />
                       </td>
                     </tr>
                   ))}
                   {filteredRecords.length === 0 && (
                     <tr>
-                      <td colSpan={10} className="px-4 py-12 text-center text-gray-400 font-sans">
+                      <td colSpan={14} className="px-4 py-12 text-center text-gray-400 font-sans">
                         No matching attendance records found. Adjust target month, year or search entries.
                       </td>
                     </tr>
                   )}
                   {/* Ledger totals row */}
                   <tr className="bg-slate-50 border-t-2 border-slate-300 font-sans font-bold text-[11px] print:bg-slate-100">
-                    <td colSpan={6} className="px-4 py-3 text-right text-gray-500 uppercase">Grand Totals:</td>
-                    <td className="px-4 py-3 text-right text-rose-700 font-mono text-xs">{totalTardinessMins} mins</td>
-                    <td className="px-4 py-3 text-right text-amber-700 font-mono text-xs">{totalUndertimeMins} mins</td>
-                    <td className="px-4 py-3 text-right text-indigo-700 font-mono text-xs">₱{totalPhilhealthDeductions.toFixed(2)}</td>
-                    <td className="px-4 py-3 text-right text-emerald-800 font-mono text-xs">
+                    <td colSpan={8} className="px-3 py-3 text-right text-gray-500 uppercase">Grand Totals:</td>
+                    <td className="px-3 py-3 text-right text-rose-700 font-mono text-xs">{totalTardinessMins} mins</td>
+                    <td className="px-3 py-3 text-right text-amber-700 font-mono text-xs">{totalUndertimeMins} mins</td>
+                    <td className="px-3 py-3 text-right text-slate-700 font-mono text-xs">{totalWorkedHours.toFixed(1)} hrs</td>
+                    <td className="px-3 py-3 text-right text-indigo-700 font-mono text-xs">₱{totalPhilhealthDeductions.toFixed(2)}</td>
+                    <td className="px-3 py-3 text-right text-emerald-800 font-mono text-xs">
                       ₱{totalPayoutSums.toLocaleString([], { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
+                    <td className="px-3 py-3"></td>
                   </tr>
                 </tbody>
               </table>

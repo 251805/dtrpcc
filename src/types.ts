@@ -3,6 +3,7 @@ export interface Employee {
   name: string;
   rate_per_day: number;
   philhealth: number;
+  role?: string;
 }
 
 export type ActionType = 'LOGIN' | 'LOGOUT';

@@ -24,6 +24,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
   const [newEid, setNewEid] = useState('');
   const [newName, setNewName] = useState('');
   const [newRate, setNewRate] = useState(532);
+  const [newRole, setNewRole] = useState('CCTV OPERATOR');
   const [newPhilhealth, setNewPhilhealth] = useState(1);
 
   // Active sub-tab
@@ -80,13 +81,15 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
       eid: cleanEid,
       name: cleanName,
       rate_per_day: Number(newRate),
-      philhealth: Number(newPhilhealth)
+      philhealth: Number(newPhilhealth),
+      role: newRole.trim().toUpperCase()
     };
 
     await saveEmployee(item);
     setNewEid('');
     setNewName('');
     setNewRate(532);
+    setNewRole('CCTV OPERATOR');
     setNewPhilhealth(1);
     await loadAdminData();
     onRefreshEmployeesList();
@@ -124,9 +127,9 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
 
   // Re-seed trigger fallback
   const handleForceSync = async () => {
-    const confirmSync = window.confirm("This will force-seed reference employees to Firestore if the DB has been cleared. Proceed?");
+    const confirmSync = window.confirm("This will forcefully sync and update the reference employees list (with their roles and pay rates) to Firestore. Proceed?");
     if (confirmSync) {
-      await seedEmployeesIfEmpty();
+      await seedEmployeesIfEmpty(true);
       await loadAdminData();
       onRefreshEmployeesList();
     }
@@ -267,7 +270,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                   <Plus size={16} className="text-emerald-500" />
                   Add New Active Personnel Records
                 </h3>
-                <form onSubmit={handleAddEmployee} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+                <form onSubmit={handleAddEmployee} className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end">
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Employee ID (EID)</label>
                     <input 
@@ -286,6 +289,17 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                       value={newName} 
                       onChange={e => setNewName(e.target.value)}
                       placeholder="e.g. CARLO REYES" 
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Position / Role</label>
+                    <input 
+                      type="text" 
+                      value={newRole} 
+                      onChange={e => setNewRole(e.target.value)}
+                      placeholder="e.g. CCTV OPERATOR" 
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
                       required
                     />
@@ -331,6 +345,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                     <tr>
                       <th className="px-6 py-3.5">EID Barcode</th>
                       <th className="px-6 py-3.5">Employee Name</th>
+                      <th className="px-6 py-3.5">Position / Role</th>
                       <th className="px-6 py-3.5">Daily rate (₱)</th>
                       <th className="px-6 py-3.5">PhilHealth Contribution</th>
                       <th className="px-6 py-3.5 text-right w-36">Actions</th>
@@ -346,6 +361,15 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                             value={emp.name} 
                             onChange={(e) => handleUpdateEmployeeField(emp.eid, 'name', e.target.value.toUpperCase())}
                             className="w-full max-w-sm px-2 py-1 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-normal"
+                          />
+                        </td>
+                        <td className="px-6 py-3">
+                          <input 
+                            type="text" 
+                            value={emp.role || ''} 
+                            onChange={(e) => handleUpdateEmployeeField(emp.eid, 'role', e.target.value.toUpperCase())}
+                            placeholder="CCTV OPERATOR"
+                            className="w-full px-2 py-1 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-normal font-sans text-xs"
                           />
                         </td>
                         <td className="px-6 py-3 font-mono">

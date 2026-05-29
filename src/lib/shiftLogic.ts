@@ -6,10 +6,10 @@ export interface Shift {
 }
 
 export const SHIFTS: Shift[] = [
-  { name: 'Morning Shift', start: 360, end: 840, overnight: false }, // 06:00 AM - 02:00 PM
-  { name: 'Regular Shift', start: 480, end: 1020, overnight: false }, // 08:00 AM - 05:00 PM
-  { name: 'Afternoon Shift', start: 840, end: 1320, overnight: false }, // 02:00 PM - 10:00 PM
-  { name: 'Night Shift', start: 1320, end: 360, overnight: true },   // 10:00 PM - 06:00 AM
+  { name: 'Morning 6am-2pm', start: 360, end: 840, overnight: false }, // 06:00 AM - 02:00 PM
+  { name: 'Regular 8am-5pm', start: 480, end: 1020, overnight: false }, // 08:00 AM - 05:00 PM
+  { name: 'Afternoon 2pm-10pm', start: 840, end: 1320, overnight: false }, // 02:00 PM - 10:00 PM
+  { name: 'Night 10pm-6am', start: 1320, end: 360, overnight: true },   // 10:00 PM - 06:00 AM
 ];
 
 // Helper to convert date-time or HH:MM string to minutes-from-midnight
