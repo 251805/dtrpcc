@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;450;600;800&family=Space+Grotesk:wght@450;700&family=JetBrains+Mono:wght@450;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+body {
+  background-color: #f8fafc; /* Beautiful soft slate slate-50 background */
+}
+
+/* Hardened system printer styling */
+@media print {
+  /* Hide all user interfaces during DTR printing operations */
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  #app-header, 
+  #Persistent-pairing-card, 
+  #attendance-card-root, 
+  #scanner-modal, 
+  #admin-roster-modal, 
+  #status-bar, 
+  main, 
+  header, 
+  button, 
+  .print\:hidden {
+    display: none !important;
+  }
+
+  #report-dashboard {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    background: white !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  th, td {
+    border: 1px solid #e2e8f0 !important;
+    padding: 6px 8px !important;
+    font-size: 10px !important;
+  }
+}

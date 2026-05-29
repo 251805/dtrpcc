@@ -1,0 +1,6 @@
+{
+  "name": "Pagbilao Command Center DTR",
+  "description": "Enterprise-grade DTR attendance tracker system for Pagbilao Command Center",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

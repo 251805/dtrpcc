@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global safety net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 64;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Employees Collection: Only valid formats can be saved
+    match /employees/{employeeId} {
+      allow read: if true;
+      allow create, update: if isValidId(employeeId) && 
+                            incoming().eid is string && 
+                            incoming().name is string;
+      allow delete: if true; 
+    }
+
+    // Attendance collections: Immutable audit logs
+    match /attendance/{attendanceId} {
+      allow read: if true;
+      allow create: if incoming().employee_id is string && 
+                    incoming().action in ['LOGIN', 'LOGOUT'] &&
+                    incoming().source in ['SCAN', 'MANUAL'];
+      allow update, delete: if false; // Immutable logs
+    }
+
+    // Attendance Sessions: tracks shift allocations
+    match /attendance_sessions/{sessionId} {
+      allow read: if true;
+      allow create: if incoming().employee_id is string && 
+                    incoming().date is string;
+      allow update: if incoming().employee_id == existing().employee_id;
+      allow delete: if true;
+    }
+  }
+}

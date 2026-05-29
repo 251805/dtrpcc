@@ -1,0 +1,54 @@
+{
+  "entities": {
+    "Employee": {
+      "title": "Employee",
+      "description": "Registry of active personnel",
+      "type": "object",
+      "properties": {
+        "eid": { "type": "string", "description": "Unique Employee ID" },
+        "name": { "type": "string", "description": "Full name" },
+        "rate_per_day": { "type": "number", "description": "Daily rate" },
+        "philhealth": { "type": "number", "description": "PhilHealth status/rate" }
+      },
+      "required": ["eid", "name"]
+    },
+    "Attendance": {
+      "title": "Attendance",
+      "description": "Atomic check-in/out record",
+      "type": "object",
+      "properties": {
+        "employee_id": { "type": "string", "description": "Link to employee.eid" },
+        "action": { "type": "string", "enum": ["LOGIN", "LOGOUT"], "description": "Action type" },
+        "source": { "type": "string", "description": "SCAN or MANUAL" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Transaction time" }
+      },
+      "required": ["employee_id", "action", "timestamp"]
+    },
+    "AttendanceSession": {
+      "title": "AttendanceSession",
+      "description": "Paired shift session",
+      "type": "object",
+      "properties": {
+        "employee_id": { "type": "string", "description": "Link to employee.eid" },
+        "login_at": { "type": "string", "format": "date-time", "description": "Start time" },
+        "logout_at": { "type": "string", "format": "date-time", "description": "End time" },
+        "date": { "type": "string", "description": "ISO date" }
+      },
+      "required": ["employee_id", "login_at", "date"]
+    }
+  },
+  "firestore": {
+    "employees": {
+      "schema": "Employee",
+      "description": "Personnel registry"
+    },
+    "attendance": {
+      "schema": "Attendance",
+      "description": "Atomic transaction logs"
+    },
+    "attendance_sessions": {
+      "schema": "AttendanceSession",
+      "description": "Paired work session logs"
+    }
+  }
+}
