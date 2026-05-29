@@ -25,7 +25,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
   const [newName, setNewName] = useState('');
   const [newRate, setNewRate] = useState(532);
   const [newRole, setNewRole] = useState('CCTV OPERATOR');
-  const [newPhilhealth, setNewPhilhealth] = useState(1);
+  const [newPhilhealth, setNewPhilhealth] = useState(15);
 
   // Active sub-tab
   const [activeTab, setActiveTab] = useState<'roster' | 'logs' | 'sessions'>('roster');
@@ -90,7 +90,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
     setNewName('');
     setNewRate(532);
     setNewRole('CCTV OPERATOR');
-    setNewPhilhealth(1);
+    setNewPhilhealth(15);
     await loadAdminData();
     onRefreshEmployeesList();
   };
@@ -143,7 +143,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
             <div className="p-3 bg-indigo-50 text-indigo-600 rounded-full">
               <Lock size={32} />
             </div>
-            <h2 className="text-xl font-bold font-sans tracking-tight">Admin Authentication Gateway</h2>
+            <h2 className="text-xl font-bold font-sans tracking-tight">Admin</h2>
             <p className="text-sm text-gray-500">Sign in to manage crew rosters and access secure DTR databases.</p>
           </div>
 
@@ -154,7 +154,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                 type="text" 
                 value={username} 
                 onChange={e => setUsername(e.target.value)}
-                placeholder="e.g. admin or lee"
+                placeholder="e.g. admin"
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-emerald-500"
                 required
               />
@@ -232,7 +232,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
               onClick={() => setActiveTab('logs')}
               className={`py-4 border-b-2 font-semibold text-sm transition-all ${activeTab === 'logs' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
             >
-              Atomic Punch Audit Logs
+              Time Audit Logs
             </button>
             <button 
               onClick={() => setActiveTab('sessions')}
@@ -317,15 +317,17 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                   </div>
                   <div className="flex gap-2">
                     <div className="flex-1">
-                      <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">PhilHealth</label>
-                      <select 
+                      <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">PhilHealth (₱)</label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        min="0"
                         value={newPhilhealth} 
                         onChange={e => setNewPhilhealth(Number(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
-                      >
-                        <option value={1}>Standard Contribution (₱15.00)</option>
-                        <option value={0}>Exempted</option>
-                      </select>
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white font-mono"
+                        placeholder="e.g. 15.00"
+                        required
+                      />
                     </div>
                     <button 
                       type="submit"
@@ -380,15 +382,16 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                             className="w-24 px-2 py-1 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-normal"
                           />
                         </td>
-                        <td className="px-6 py-3">
-                          <select 
+                        <td className="px-6 py-3 font-mono">
+                          <input 
+                            type="number" 
+                            step="0.01"
+                            min="0"
                             value={emp.philhealth} 
                             onChange={(e) => handleUpdateEmployeeField(emp.eid, 'philhealth', Number(e.target.value))}
-                            className="px-2 py-1 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-normal"
-                          >
-                            <option value={1}>Active Contribution (₱15.00)</option>
-                            <option value={0}>Exempted</option>
-                          </select>
+                            className="w-20 px-2 py-1 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-normal font-mono"
+                            placeholder="0.00"
+                          />
                         </td>
                         <td className="px-6 py-3 text-right">
                           <div className="flex justify-end gap-2">

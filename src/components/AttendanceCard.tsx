@@ -349,7 +349,7 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
 
         {/* Identity Section: Client-side device configuration */}
         <div id="persistent-device-card" className="border border-gray-200 rounded-xl p-4 bg-slate-50">
-          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Persisted Device Pairing</h3>
+          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">You need to pair device to continue</h3>
           {identifiedEid ? (
             <div className="flex justify-between items-center bg-white p-3 border border-gray-200 rounded-lg">
               <div className="flex items-center gap-2">
@@ -396,9 +396,9 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
             className="w-full py-6 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold rounded-2xl flex flex-col items-center justify-center gap-2 shadow-lg transition duration-200 uppercase tracking-wider text-sm cursor-pointer"
           >
             <Camera size={36} className="animate-pulse" />
-            Scan Attendance Station QR
+            Use your camera to scan QR
           </button>
-          <p className="text-xs text-gray-400">Scan QR codes broadcasted on mounted wall tablet kiosks</p>
+          <p className="text-xs text-gray-400">Compatible with Android and IOS device </p>
         </div>
 
         {/* Manual Keyboard Entry Accordion fallback */}
@@ -410,7 +410,7 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
           >
             <span className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1.5">
               <AlertCircle size={14} className="text-indigo-600" />
-              Key-in manual input fallback (Optional)
+              Manual input
             </span>
             <span className="text-xs text-gray-500">{isManualExpanded ? 'Collapse' : 'Expand'}</span>
           </button>
@@ -434,7 +434,7 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
                   id="manual-punch-remarks"
                   value={manualRemarks}
                   onChange={(e) => setManualRemarks(e.target.value)}
-                  placeholder="e.g. Field dispatch, power restoration duties..."
+                  placeholder="e.g. Field dispatch, Office order"
                   rows={2}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs bg-white resize-none"
                 />
@@ -448,7 +448,7 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
                   }}
                   className="py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition"
                 >
-                  Clock IN [IN]
+                  IN
                 </button>
                 <button 
                   id="btn-punch-out"
@@ -457,7 +457,7 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
                   }}
                   className="py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg transition"
                 >
-                  Clock OUT [OUT]
+                  OUT
                 </button>
               </div>
             </div>

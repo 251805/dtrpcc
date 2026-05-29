@@ -91,7 +91,11 @@ export default function ReportModal({ onClose }: ReportModalProps) {
     const penaltyTardiness = tardinessMins * ratePerMinute;
     const penaltyUndertime = undertimeMins * ratePerMinute;
 
-    const philhealthDeduction = emp && emp.philhealth === 1 ? 15.00 : 0; // Standard ₱15 deductible 
+    const philhealthDeduction = emp 
+      ? (typeof emp.philhealth === 'number' 
+          ? (emp.philhealth === 1 ? 15.00 : emp.philhealth) 
+          : 0)
+      : 0;
     const grossPayout = dailyRate - penaltyTardiness - penaltyUndertime;
     const netPayout = Math.max(0, grossPayout - philhealthDeduction);
 
@@ -213,7 +217,7 @@ export default function ReportModal({ onClose }: ReportModalProps) {
           <div className="flex items-center gap-3">
             <FileSpreadsheet className="text-emerald-400" size={24} />
             <div>
-              <h2 className="text-xl font-bold tracking-tight">Monthly DTR Statistics & Payroll</h2>
+              <h2 className="text-xl font-bold tracking-tight">Monthly DTR Report</h2>
               <p className="text-xs text-neutral-400">Track attendances, late hours, undertime indices, and net balances.</p>
             </div>
           </div>

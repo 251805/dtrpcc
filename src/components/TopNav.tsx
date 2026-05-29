@@ -37,7 +37,7 @@ export default function TopNav({ onOpenAdmin, onOpenReport }: TopNavProps) {
           className="flex items-center gap-1 px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-gray-300 hover:text-white text-xs font-semibold rounded-lg transition"
         >
           <Monitor size={14} />
-          Open Kiosk Display
+          Open QR Code Display
         </button>
         <button 
           id="btn-nav-report"
@@ -45,7 +45,7 @@ export default function TopNav({ onOpenAdmin, onOpenReport }: TopNavProps) {
           className="flex items-center gap-1 px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-gray-300 hover:text-white text-xs font-semibold rounded-lg transition"
         >
           <FileText size={14} />
-          Monthly Report Matrix
+          Report
         </button>
         <button 
           id="btn-nav-admin"

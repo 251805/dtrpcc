@@ -19,13 +19,13 @@ export default function KioskView() {
         <h1 id="kiosk-title" className="text-2xl font-bold">Pagbilao Command Center</h1>
         <div id="system-status" className="flex items-center gap-2 text-green-400">
           <Wifi size={20} />
-          <span>System Online</span>
+          <span>Online</span>
         </div>
       </div>
 
       <div id="kiosk-main" className="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-4xl items-center">
         <div id="kiosk-clock-panel" className="space-y-4">
-          <h2 id="kiosk-clock-label" className="text-gray-400 text-lg uppercase tracking-wider">Live System Time</h2>
+          <h2 id="kiosk-clock-label" className="text-gray-400 text-lg uppercase tracking-wider">Current Time</h2>
           <div id="kiosk-clock" className="text-6xl font-mono font-bold">
             {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </div>
@@ -36,8 +36,8 @@ export default function KioskView() {
 
         <div id="qr-panel" className="bg-white p-6 rounded-xl flex flex-col items-center">
           <QRCodeSVG id="kiosk-qr" value={qrValue} size={256} />
-          <p id="qr-label" className="text-neutral-900 mt-4 font-semibold uppercase">Scan Station</p>
-          <p id="qr-expiry" className="text-neutral-600 text-sm">Expires daily: {todayStr}</p>
+          <p id="qr-label" className="text-neutral-900 mt-4 font-semibold uppercase">Scan with your Android or IOS device</p>
+          <p id="qr-expiry" className="text-neutral-600 text-sm">{todayStr}</p>
         </div>
       </div>
     </div>
