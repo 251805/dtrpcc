@@ -131,7 +131,7 @@ export default function App() {
             <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl space-y-2">
               <span className="text-[10px] font-bold text-indigo-700 tracking-wider uppercase font-mono">Pairing Instructions</span>
               <p className="text-xs text-gray-600 leading-relaxed">
-                Pair your smartphone above, then present your screen camera to the terminal QR code to record sub-second logins.
+                Pair your smartphone with your Employee ID, then using you camera scan QR code to record logins.
               </p>
             </div>
           </div>

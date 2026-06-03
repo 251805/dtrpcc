@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, RefreshCw, AlertCircle, CheckCircle, HelpCircle, ArrowRight, UserCheck } from 'lucide-react';
+import { Camera, RefreshCw, AlertCircle, CheckCircle, HelpCircle, ArrowRight, UserCheck } from 'lucide-react';25
 import { db, saveEmployee, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, addDoc, query, where, getDocs, orderBy, limit, updateDoc, doc, Timestamp } from 'firebase/firestore';
 import { findClosestShift, calculateTardiness, calculateUndertime } from '../lib/shiftLogic';
@@ -424,7 +424,7 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
                   type="text" 
                   value={manualEid}
                   onChange={(e) => setManualEid(e.target.value)}
-                  placeholder="Insert EID (e.g., 251805)"
+                  placeholder="Insert EID (e.g., 527659)"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
                 />
               </div>
