@@ -17,6 +17,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
 
   // Roster lists
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loadedEmployees, setLoadedEmployees] = useState<Employee[]>([]);
   const [attendanceLogs, setAttendanceLogs] = useState<any[]>([]);
   const [sessions, setSessions] = useState<any[]>([]);
   
@@ -38,7 +39,8 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
 
   const loadAdminData = async () => {
     const list = await getEmployees();
-    setEmployees(list);
+    setEmployees(JSON.parse(JSON.stringify(list)));
+    setLoadedEmployees(list);
 
     const logs = await getAttendanceLogs();
     setAttendanceLogs(logs);
@@ -104,23 +106,66 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
     }));
   };
 
-  const handleSaveEmployeeEdits = async (emp: Employee) => {
-    await saveEmployee(emp);
-    alert(`Employee ${emp.name} updated successfully!`);
-    await loadAdminData();
-    onRefreshEmployeesList();
+  const handleUpdateEmployeeFieldByIndex = (index: number, field: keyof Employee, value: any) => {
+    setEmployees(prev => prev.map((emp, i) => {
+      if (i === index) {
+        return { ...emp, [field]: value };
+      }
+      return emp;
+    }));
   };
 
-  const handleDeleteEmployeeItem = async (eid: string, name: string) => {
-    if (role !== 'ROOT') {
-      alert("Only ROOT administrators (lee) can delete registered personnel.");
+  const handleSaveEmployeeEdits = async (emp: Employee, index: number) => {
+    const cleanEid = emp.eid.trim();
+    const cleanName = emp.name.trim().toUpperCase();
+
+    if (!cleanEid || !cleanName) {
+      alert("Employee ID and Name cannot be empty.");
       return;
     }
 
-    const confirmDel = window.confirm(`Are you absolutely sure you want to delete ${name} (EID: ${eid})?`);
+    const originalEid = loadedEmployees[index]?.eid;
+
+    // Check if the new EID is already used by another employee (different index)
+    const isEidTaken = loadedEmployees.some((le, idx) => idx !== index && le.eid === cleanEid);
+    if (isEidTaken) {
+      alert(`Error: Employee ID "${cleanEid}" is already assigned to another employee.`);
+      return;
+    }
+
+    try {
+      if (originalEid && originalEid !== cleanEid) {
+        const confirmChange = window.confirm(`You are changing the Employee ID from "${originalEid}" to "${cleanEid}". This will migrate their profile to the new ID. Proceed?`);
+        if (!confirmChange) return;
+
+        // Delete the old record
+        await deleteEmployee(originalEid);
+      }
+
+      await saveEmployee({
+        ...emp,
+        eid: cleanEid,
+        name: cleanName
+      });
+
+      alert(`Employee updated successfully!`);
+      await loadAdminData();
+      onRefreshEmployeesList();
+    } catch (err) {
+      alert("Failed to save employee changes.");
+      console.error(err);
+    }
+  };
+
+  const handleDeleteEmployeeItem = async (index: number) => {
+    const originalEid = loadedEmployees[index]?.eid;
+    const currentName = employees[index]?.name;
+    if (!originalEid) return;
+
+    const confirmDel = window.confirm(`Are you absolutely sure you want to delete ${currentName} (EID: ${originalEid})?`);
     if (!confirmDel) return;
 
-    await deleteEmployee(eid);
+    await deleteEmployee(originalEid);
     await loadAdminData();
     onRefreshEmployeesList();
   };
@@ -188,7 +233,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                 className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition flex gap-1 justify-center items-center"
               >
                 <LogIn size={16} />
-                Access DB
+                Submit
               </button>
             </div>
           </form>
@@ -288,7 +333,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                       type="text" 
                       value={newName} 
                       onChange={e => setNewName(e.target.value)}
-                      placeholder="e.g. CARLO REYES" 
+                      placeholder="e.g. jarold lee" 
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
                       required
                     />
@@ -354,14 +399,22 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 font-sans">
-                    {employees.map((emp) => (
-                      <tr key={emp.eid} className="hover:bg-slate-50/50 transition">
-                        <td className="px-6 py-3 font-mono font-bold text-gray-500">{emp.eid}</td>
+                    {employees.map((emp, index) => (
+                      <tr key={index} className="hover:bg-slate-50/50 transition">
+                        <td className="px-6 py-3 font-mono font-bold text-gray-500">
+                          <input 
+                            type="text" 
+                            value={emp.eid} 
+                            onChange={(e) => handleUpdateEmployeeFieldByIndex(index, 'eid', e.target.value.trim().toUpperCase())}
+                            className="w-24 px-2 py-1 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-normal font-mono font-bold text-gray-700"
+                            placeholder="EID"
+                          />
+                        </td>
                         <td className="px-6 py-3 font-semibold text-gray-900">
                           <input 
                             type="text" 
                             value={emp.name} 
-                            onChange={(e) => handleUpdateEmployeeField(emp.eid, 'name', e.target.value.toUpperCase())}
+                            onChange={(e) => handleUpdateEmployeeFieldByIndex(index, 'name', e.target.value.toUpperCase())}
                             className="w-full max-w-sm px-2 py-1 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-normal"
                           />
                         </td>
@@ -369,7 +422,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                           <input 
                             type="text" 
                             value={emp.role || ''} 
-                            onChange={(e) => handleUpdateEmployeeField(emp.eid, 'role', e.target.value.toUpperCase())}
+                            onChange={(e) => handleUpdateEmployeeFieldByIndex(index, 'role', e.target.value.toUpperCase())}
                             placeholder="CCTV OPERATOR"
                             className="w-full px-2 py-1 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-normal font-sans text-xs"
                           />
@@ -378,7 +431,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                           <input 
                             type="number" 
                             value={emp.rate_per_day} 
-                            onChange={(e) => handleUpdateEmployeeField(emp.eid, 'rate_per_day', Number(e.target.value))}
+                            onChange={(e) => handleUpdateEmployeeFieldByIndex(index, 'rate_per_day', Number(e.target.value))}
                             className="w-24 px-2 py-1 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-normal"
                           />
                         </td>
@@ -388,7 +441,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                             step="0.01"
                             min="0"
                             value={emp.philhealth} 
-                            onChange={(e) => handleUpdateEmployeeField(emp.eid, 'philhealth', Number(e.target.value))}
+                            onChange={(e) => handleUpdateEmployeeFieldByIndex(index, 'philhealth', Number(e.target.value))}
                             className="w-20 px-2 py-1 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-normal font-mono"
                             placeholder="0.00"
                           />
@@ -396,7 +449,7 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                         <td className="px-6 py-3 text-right">
                           <div className="flex justify-end gap-2">
                             <button 
-                              onClick={() => handleSaveEmployeeEdits(emp)}
+                              onClick={() => handleSaveEmployeeEdits(emp, index)}
                               className="p-1 px-2 hover:bg-indigo-50 text-indigo-600 rounded flex items-center gap-1 text-xs font-semibold transition"
                               title="Commit updates"
                             >
@@ -404,10 +457,9 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
                               Save
                             </button>
                             <button 
-                              onClick={() => handleDeleteEmployeeItem(emp.eid, emp.name)}
-                              className={`p-1 px-2 text-xs rounded flex items-center gap-1 transition ${role === 'ROOT' ? 'hover:bg-red-50 text-red-600' : 'text-gray-300 cursor-not-allowed'}`}
-                              disabled={role !== 'ROOT'}
-                              title={role !== 'ROOT' ? 'Only lee with ROOT access can delete' : 'Permanently delete'}
+                              onClick={() => handleDeleteEmployeeItem(index)}
+                              className="p-1 px-2 text-xs rounded flex items-center gap-1 transition hover:bg-red-50 text-red-600"
+                              title="Permanently delete"
                             >
                               <Trash2 size={14} />
                               Delete

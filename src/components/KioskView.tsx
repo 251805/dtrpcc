@@ -15,11 +15,20 @@ export default function KioskView() {
 
   return (
     <div id="kiosk-container" className="min-h-screen bg-neutral-900 text-white p-8 flex flex-col items-center justify-center font-sans">
-      <div id="kiosk-header" className="flex justify-between w-full max-w-4xl mb-12">
-        <h1 id="kiosk-title" className="text-2xl font-bold">Pagbilao Command Center</h1>
-        <div id="system-status" className="flex items-center gap-2 text-green-400">
-          <Wifi size={20} />
-          <span>Online</span>
+      <div id="kiosk-header" className="flex justify-between items-start w-full max-w-4xl mb-12 border-b border-neutral-800 pb-6">
+        <div className="flex items-center gap-4">
+          <img 
+            id="kiosk-logo"
+            src="https://raw.githubusercontent.com/251805/etcfile/main/PCCLogo.png" 
+            alt="PCC Logo" 
+            className="h-16 w-auto object-contain select-none"
+            referrerPolicy="no-referrer"
+          />
+          <h1 id="kiosk-title" className="text-3xl font-bold tracking-tight">Pagbilao Command Center</h1>
+        </div>
+        <div id="system-status" className="flex items-center gap-2 text-green-400 bg-green-500/10 px-3 py-1.5 rounded-full border border-green-500/20 mt-1">
+          <Wifi size={16} className="animate-pulse" />
+          <span className="text-sm font-semibold tracking-wide">Online</span>
         </div>
       </div>
 

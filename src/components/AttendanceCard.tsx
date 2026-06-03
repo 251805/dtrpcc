@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, RefreshCw, AlertCircle, CheckCircle, HelpCircle, ArrowRight, UserCheck } from 'lucide-react';25
+import { Camera, RefreshCw, AlertCircle, CheckCircle, HelpCircle, ArrowRight, UserCheck } from 'lucide-react';
 import { db, saveEmployee, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, addDoc, query, where, getDocs, orderBy, limit, updateDoc, doc, Timestamp } from 'firebase/firestore';
 import { findClosestShift, calculateTardiness, calculateUndertime } from '../lib/shiftLogic';
