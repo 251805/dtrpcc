@@ -172,6 +172,10 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
 
   // Re-seed trigger fallback
   const handleForceSync = async () => {
+    if (role !== 'ROOT') {
+      alert("Only ROOT administrators can forcefully seed or re-seed the reference database.");
+      return;
+    }
     const confirmSync = window.confirm("This will forcefully sync and update the reference employees list (with their roles and pay rates) to Firestore. Proceed?");
     if (confirmSync) {
       await seedEmployeesIfEmpty(true);
@@ -287,22 +291,24 @@ export default function AdminModal({ onClose, onRefreshEmployeesList }: AdminMod
             </button>
           </div>
 
-          <div className="flex gap-2">
-            <button 
-              onClick={handleForceSync}
-              className="flex items-center gap-1.5 px-3 py-1.5 outline outline-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-gray-600 rounded-lg transition"
-            >
-              <Database size={14} />
-              Ref-Seed DB
-            </button>
-            <button 
-              onClick={loadAdminData}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-xs font-semibold text-gray-600 rounded-lg transition"
-            >
-              <RefreshCw size={14} />
-              Sync Data
-            </button>
-          </div>
+          {role === 'ROOT' && (
+            <div className="flex gap-2">
+              <button 
+                onClick={handleForceSync}
+                className="flex items-center gap-1.5 px-3 py-1.5 outline outline-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-gray-600 rounded-lg transition"
+              >
+                <Database size={14} />
+                Ref-Seed DB
+              </button>
+              <button 
+                onClick={loadAdminData}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-xs font-semibold text-gray-600 rounded-lg transition"
+              >
+                <RefreshCw size={14} />
+                Sync Data
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Interactive Workspace Area */}

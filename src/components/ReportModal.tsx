@@ -237,7 +237,7 @@ export default function ReportModal({ onClose }: ReportModalProps) {
                 type="text" 
                 value={searchEid} 
                 onChange={(e) => setSearchEid(e.target.value)}
-                placeholder="Type Name or EID barcode..."
+                placeholder="Type name to search data "
                 className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-indigo-500"
               />
             </div>
