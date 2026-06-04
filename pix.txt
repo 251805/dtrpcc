@@ -1,0 +1,25 @@
+import { Employee } from '../types';
+
+export const SEED_EMPLOYEES: Employee[] = [
+  { eid: '221739', name: 'GIDDEL MACALIPAY', rate_per_day: 1200, philhealth: 0, role: 'CCTV SUPERVISOR' }, - https://github.com/251805/etcfile/blob/main/gdel.jpeg
+  { eid: '251805', name: 'LEE LUZADAS', rate_per_day: 647, philhealth: 0, role: 'CCTV TECHNICIAN' }, - https://github.com/251805/etcfile/blob/main/lee.jpeg
+  { eid: '221736', name: 'LEANDRO VALIDO', rate_per_day: 647, philhealth: 0, role: 'CCTV TECHNICIAN' }, - https://github.com/251805/etcfile/blob/main/validz.jpeg
+  { eid: '251800', name: 'JULIE ALVAREZ', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/julie.jpeg
+  { eid: '251806', name: 'JERONCIUS LABIAL', rate_per_day: 532, philhealth: 0, role: 'DRIVER' }, - https://github.com/251805/etcfile/blob/main/jeron.jpeg
+  { eid: '251808', name: 'MARK REGIO', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/hepe.jpeg
+  { eid: '251803', name: 'KENT SIMOUNE PIÑOL', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/toto.jpeg
+  { eid: '23678', name: 'MARK ANCEL GUTIERREZ', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/monok.jpeg
+  { eid: '251809', name: 'JACK UY', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/jack.jpeg
+  { eid: '221741', name: 'JERSON AMBAL', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/ambal.jpeg
+  { eid: '251804', name: 'JONH WILFRED ZARSUELO', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/jaja.jpeg
+  { eid: '251801', name: 'MARVIN RIVERO', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/marvin.jpeg
+  { eid: '251812', name: 'GERSON MENDOZA', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/utoy.jpeg
+  { eid: '261814', name: 'JAGER MIK AGUILA', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/jager.jpeg
+  { eid: '261820', name: 'CARL ANDRE NOCUM', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/andre.jpeg
+  { eid: '261818', name: 'ANGELO ALBAÑO', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/alo.jpg
+  { eid: '261813', name: 'GLENIEL PIONILLA', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/glen.jpeg
+  { eid: '261819', name: 'JHON JOVERICK SOGOCIO', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/joevrick.jpeg
+  { eid: '261821', name: 'JOHN PAOLO PORTE', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/paulo.jpg
+  { eid: '261815', name: 'ANGELO MARTINEZ', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' }, - https://github.com/251805/etcfile/blob/main/gelo.jpeg
+  { eid: '261816', name: 'MARY GRACE DIMATULAC', rate_per_day: 532, philhealth: 0, role: 'CCTV OPERATOR' } - https://github.com/251805/etcfile/blob/main/gara.jpg
+];

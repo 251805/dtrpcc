@@ -4,6 +4,8 @@ import { db, saveEmployee, handleFirestoreError, OperationType } from '../lib/fi
 import { collection, addDoc, query, where, getDocs, orderBy, limit, updateDoc, doc, Timestamp } from 'firebase/firestore';
 import { findClosestShift, calculateTardiness, calculateUndertime } from '../lib/shiftLogic';
 import QRScanner from './QRScanner';
+import { SEED_EMPLOYEES } from '../lib/seedEmployees';
+import EmployeeAvatarModal from './EmployeeAvatarModal';
 
 interface AttendanceCardProps {
   onRefreshAll: () => void;
@@ -26,6 +28,15 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
 
   // Operational Transaction logs toast
   const [statusMsg, setStatusMsg] = useState<{ text: string, type: 'success' | 'error' | 'info' } | null>(null);
+
+  // Active user avatar modal popup data
+  const [avatarModalData, setAvatarModalData] = useState<{
+    eid: string;
+    name: string;
+    role: string;
+    action: 'LOGIN' | 'LOGOUT';
+    timestamp: Date;
+  } | null>(null);
 
   // Last clocked track for prevention of double clocking (Anti-spam duplicate filter)
   // Maps Employee EID to Timestamp (millis)
@@ -96,18 +107,27 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
       );
       
       let employeeName = `EID ${cleanEid}`;
+      let employeeRole = 'CREW';
       if (empQuerySnapshot.empty) {
         // Self-heal and seed under general PCC Crew details as specified in Manual Section 4
         console.log(`Self-healing unregistered employee: ${cleanEid}`);
+        const matchedLocal = SEED_EMPLOYEES.find(e => e.eid === cleanEid);
+        const autoRole = matchedLocal ? matchedLocal.role : 'CREW';
+        const autoName = matchedLocal ? matchedLocal.name : `PCC CREW-${cleanEid}`;
+
         await saveEmployee({
           eid: cleanEid,
-          name: `PCC CREW-${cleanEid}`,
-          rate_per_day: 532,
-          philhealth: 0
+          name: autoName,
+          rate_per_day: matchedLocal ? matchedLocal.rate_per_day : 532,
+          philhealth: 0,
+          role: autoRole
         });
-        employeeName = `PCC CREW-${cleanEid}`;
+        employeeName = autoName;
+        employeeRole = autoRole;
       } else {
-        employeeName = empQuerySnapshot.docs[0].data().name;
+        const empData = empQuerySnapshot.docs[0].data();
+        employeeName = empData.name;
+        employeeRole = empData.role || 'CREW';
       }
 
       // Determine Action Type: Alternating or Forced
@@ -193,6 +213,15 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
         [cleanEid]: nowMs
       }));
 
+      // Trigger Avatar modal!
+      setAvatarModalData({
+        eid: cleanEid,
+        name: employeeName,
+        role: employeeRole,
+        action: actionType,
+        timestamp: new Date()
+      });
+
       onRefreshAll();
 
     } catch (e: any) {
@@ -222,6 +251,16 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
       localStorage.setItem('theory11_local_attendance', JSON.stringify(localLogs));
 
       showStatus(`[LOCAL ONLY BACKUP] Saved punch offline for EID: ${eid}. Session will batch-sync immediately upon recovery.`, 'info');
+
+      // Set avatar modal data for offline display fallback
+      const localEmp = SEED_EMPLOYEES.find(e => e.eid === eid);
+      setAvatarModalData({
+        eid,
+        name: localEmp ? localEmp.name : `Crew EID ${eid}`,
+        role: localEmp ? localEmp.role || 'CREW' : 'CREW',
+        action: actionType,
+        timestamp: new Date()
+      });
     } catch (err) {
       showStatus("Critical: offline storage capacity exhausted.", 'error');
     }
@@ -470,6 +509,18 @@ export default function AttendanceCard({ onRefreshAll }: AttendanceCardProps) {
         <QRScanner 
           onScanSuccess={handleQRScanSuccess} 
           onClose={() => setShowScanner(false)} 
+        />
+      )}
+
+      {/* Employee Avatar Success Overlay Modal */}
+      {avatarModalData && (
+        <EmployeeAvatarModal
+          eid={avatarModalData.eid}
+          name={avatarModalData.name}
+          role={avatarModalData.role}
+          action={avatarModalData.action}
+          timestamp={avatarModalData.timestamp}
+          onClose={() => setAvatarModalData(null)}
         />
       )}
     </div>
