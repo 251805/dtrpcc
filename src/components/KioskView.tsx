@@ -42,13 +42,13 @@ export default function KioskView() {
             {time.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
-
         <div id="qr-panel" className="bg-white p-6 rounded-xl flex flex-col items-center">
           <QRCodeSVG id="kiosk-qr" value={qrValue} size={256} />
-          <p id="qr-label" className="text-neutral-900 mt-4 font-semibold uppercase">Scan with your Android or IOS device</p>
-          <p id="qr-expiry" className="text-neutral-600 text-sm">{todayStr}</p>
-        </div>
-      </div>
-    </div>
+          <p id="qr-label" className="text-neutral-900 mt-4 font-semibold text-center">Please visit 🔗 dtrpcc.vercel.app 🔗 to bind your device.</p>
+          <p id="qr-expiry" className="text-neutral-100 text-sm">{todayStr}</p>          
+        </div>                          
+      </div>      
+      
+    </div> 
   );
 }
