@@ -28,13 +28,13 @@ service cloud.firestore {
       allow delete: if true; 
     }
 
-    // Attendance collections: Immutable audit logs
+    // Attendance collections: Audit logs
     match /attendance/{attendanceId} {
       allow read: if true;
       allow create: if incoming().employee_id is string && 
-                    incoming().action in ['LOGIN', 'LOGOUT'] &&
+                    incoming().action in ['LOGIN', 'LOGOUT', 'SAVE'] &&
                     incoming().source in ['SCAN', 'MANUAL'];
-      allow update, delete: if false; // Immutable logs
+      allow update, delete: if true;
     }
 
     // Attendance Sessions: tracks shift allocations

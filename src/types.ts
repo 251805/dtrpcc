@@ -6,13 +6,14 @@ export interface Employee {
   role?: string;
 }
 
-export type ActionType = 'LOGIN' | 'LOGOUT';
+export type ActionType = 'LOGIN' | 'LOGOUT' | 'SAVE';
 
 export interface Attendance {
   employee_id: string;
   action: ActionType;
   source: 'SCAN' | 'MANUAL';
   timestamp: Date;
+  remarks?: string;
 }
 
 export interface AttendanceSession {

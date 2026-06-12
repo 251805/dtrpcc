@@ -18,9 +18,10 @@
       "type": "object",
       "properties": {
         "employee_id": { "type": "string", "description": "Link to employee.eid" },
-        "action": { "type": "string", "enum": ["LOGIN", "LOGOUT"], "description": "Action type" },
+        "action": { "type": "string", "enum": ["LOGIN", "LOGOUT", "SAVE"], "description": "Action type" },
         "source": { "type": "string", "description": "SCAN or MANUAL" },
-        "timestamp": { "type": "string", "format": "date-time", "description": "Transaction time" }
+        "timestamp": { "type": "string", "format": "date-time", "description": "Transaction time" },
+        "remarks": { "type": "string", "description": "Override details and administrative notes" }
       },
       "required": ["employee_id", "action", "timestamp"]
     },
@@ -32,7 +33,8 @@
         "employee_id": { "type": "string", "description": "Link to employee.eid" },
         "login_at": { "type": "string", "format": "date-time", "description": "Start time" },
         "logout_at": { "type": "string", "format": "date-time", "description": "End time" },
-        "date": { "type": "string", "description": "ISO date" }
+        "date": { "type": "string", "description": "ISO date" },
+        "remarks": { "type": "string", "description": "Override details and administrative notes" }
       },
       "required": ["employee_id", "login_at", "date"]
     }

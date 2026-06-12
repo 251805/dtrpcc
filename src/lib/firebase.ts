@@ -192,3 +192,192 @@ export async function getAttendanceSessions(): Promise<any[]> {
     return [];
   }
 }
+
+// Validated backend wrappers for attendance sessions per User Request
+export async function createAttendanceSession(sessionData: {
+  employee_id: string;
+  login_at: Date;
+  logout_at: Date | null;
+  date: string;
+  remarks?: string;
+}): Promise<string> {
+  if (!sessionData.employee_id || typeof sessionData.employee_id !== 'string') {
+    throw new Error('Validation failed: employee_id is required and must be a string.');
+  }
+  if (!(sessionData.login_at instanceof Date) || isNaN(sessionData.login_at.getTime())) {
+    throw new Error('Validation failed: login_at must be a valid Date.');
+  }
+  if (!sessionData.date || typeof sessionData.date !== 'string') {
+    throw new Error('Validation failed: date is required and must be a string.');
+  }
+  if (sessionData.logout_at !== null) {
+    if (!(sessionData.logout_at instanceof Date) || isNaN(sessionData.logout_at.getTime())) {
+      throw new Error('Validation failed: logout_at must be a valid Date or null.');
+    }
+    if (sessionData.logout_at < sessionData.login_at) {
+      throw new Error('Validation failed: logout_at cannot be earlier than login_at.');
+    }
+  }
+
+  const pathVal = 'attendance_sessions';
+  try {
+    const docRef = await addDoc(collection(db, pathVal), {
+      employee_id: sessionData.employee_id,
+      login_at: Timestamp.fromDate(sessionData.login_at),
+      logout_at: sessionData.logout_at ? Timestamp.fromDate(sessionData.logout_at) : null,
+      date: sessionData.date,
+      remarks: sessionData.remarks || '',
+    });
+    return docRef.id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, pathVal);
+  }
+}
+
+export async function updateAttendanceSession(
+  sessionId: string,
+  updateData: {
+    employee_id?: string;
+    login_at?: Date;
+    logout_at?: Date | null;
+    date?: string;
+    remarks?: string;
+  }
+): Promise<void> {
+  if (!sessionId || typeof sessionId !== 'string') {
+    throw new Error('Validation failed: sessionId is required and must be a string.');
+  }
+
+  const cleanUpdate: Record<string, any> = {};
+
+  if (updateData.employee_id !== undefined) {
+    if (!updateData.employee_id || typeof updateData.employee_id !== 'string') {
+      throw new Error('Validation failed: employee_id must be a non-empty string.');
+    }
+    cleanUpdate.employee_id = updateData.employee_id;
+  }
+
+  if (updateData.login_at !== undefined) {
+    if (!(updateData.login_at instanceof Date) || isNaN(updateData.login_at.getTime())) {
+      throw new Error('Validation failed: login_at must be a valid Date.');
+    }
+    cleanUpdate.login_at = Timestamp.fromDate(updateData.login_at);
+  }
+
+  if (updateData.logout_at !== undefined) {
+    if (updateData.logout_at !== null) {
+      if (!(updateData.logout_at instanceof Date) || isNaN(updateData.logout_at.getTime())) {
+        throw new Error('Validation failed: logout_at must be a valid Date or null.');
+      }
+      cleanUpdate.logout_at = Timestamp.fromDate(updateData.logout_at);
+    } else {
+      cleanUpdate.logout_at = null;
+    }
+  }
+
+  if (updateData.date !== undefined) {
+    if (!updateData.date || typeof updateData.date !== 'string') {
+      throw new Error('Validation failed: date must be a non-empty string.');
+    }
+    cleanUpdate.date = updateData.date;
+  }
+
+  if (updateData.remarks !== undefined) {
+    cleanUpdate.remarks = updateData.remarks || '';
+  }
+
+  if (updateData.login_at && updateData.logout_at) {
+    if (updateData.logout_at < updateData.login_at) {
+      throw new Error('Validation failed: logout_at cannot be earlier than login_at.');
+    }
+  }
+
+  const pathVal = `attendance_sessions/${sessionId}`;
+  try {
+    await updateDoc(doc(db, 'attendance_sessions', sessionId), cleanUpdate);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, pathVal);
+  }
+}
+
+export async function deleteAttendanceSession(sessionId: string): Promise<void> {
+  if (!sessionId || typeof sessionId !== 'string') {
+    throw new Error('Validation failed: sessionId is required and must be a string.');
+  }
+
+  const pathVal = `attendance_sessions/${sessionId}`;
+  try {
+    await deleteDoc(doc(db, 'attendance_sessions', sessionId));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, pathVal);
+  }
+}
+
+export async function updateAttendanceLog(
+  logId: string,
+  updateData: {
+    employee_id?: string;
+    action?: 'LOGIN' | 'LOGOUT' | 'SAVE';
+    source?: 'SCAN' | 'MANUAL';
+    timestamp?: Date;
+    remarks?: string;
+  }
+): Promise<void> {
+  if (!logId || typeof logId !== 'string') {
+    throw new Error('Validation failed: logId is required and must be a string.');
+  }
+
+  const cleanUpdate: Record<string, any> = {};
+
+  if (updateData.employee_id !== undefined) {
+    if (!updateData.employee_id || typeof updateData.employee_id !== 'string') {
+      throw new Error('Validation failed: employee_id must be a non-empty string.');
+    }
+    cleanUpdate.employee_id = updateData.employee_id;
+  }
+
+  if (updateData.action !== undefined) {
+    if (updateData.action !== 'LOGIN' && updateData.action !== 'LOGOUT' && updateData.action !== 'SAVE') {
+      throw new Error('Validation failed: action must be LOGIN, LOGOUT or SAVE.');
+    }
+    cleanUpdate.action = updateData.action;
+  }
+
+  if (updateData.source !== undefined) {
+    if (updateData.source !== 'SCAN' && updateData.source !== 'MANUAL') {
+      throw new Error('Validation failed: source must be SCAN or MANUAL.');
+    }
+    cleanUpdate.source = updateData.source;
+  }
+
+  if (updateData.timestamp !== undefined) {
+    if (!(updateData.timestamp instanceof Date) || isNaN(updateData.timestamp.getTime())) {
+      throw new Error('Validation failed: timestamp must be a valid Date.');
+    }
+    cleanUpdate.timestamp = Timestamp.fromDate(updateData.timestamp);
+  }
+
+  if (updateData.remarks !== undefined) {
+    cleanUpdate.remarks = updateData.remarks || '';
+  }
+
+  const pathVal = `attendance/${logId}`;
+  try {
+    await updateDoc(doc(db, 'attendance', logId), cleanUpdate);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, pathVal);
+  }
+}
+
+export async function deleteAttendanceLog(logId: string): Promise<void> {
+  if (!logId || typeof logId !== 'string') {
+    throw new Error('Validation failed: logId is required and must be a string.');
+  }
+
+  const pathVal = `attendance/${logId}`;
+  try {
+    await deleteDoc(doc(db, 'attendance', logId));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, pathVal);
+  }
+}
